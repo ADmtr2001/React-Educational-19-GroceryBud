@@ -6,7 +6,7 @@ function App() {
   const [name, setName] = useState('');
   const [list, setList] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [editID, setEdigID] = useState(null);
+  const [editID, setEditID] = useState(null);
   const [alert, setAlert] = useState({
     show: false,
     msg: '',
@@ -18,7 +18,16 @@ function App() {
     if (!name) {
       showAlert(true, 'danger', 'please enter value');
     } else if (name && isEditing) {
-      // edit
+      setList(
+        list.map((item) => {
+          if (item.id === editID) return { ...item, title: name };
+          return item;
+        })
+      );
+      setName('');
+      setEditID(null);
+      setIsEditing(false);
+      showAlert(true, 'success', 'value changed');
     } else {
       showAlert(true, 'success', 'item added to the list');
       const newItem = { id: new Date().getTime().toString(), title: name };
@@ -30,17 +39,24 @@ function App() {
 
   const showAlert = (show = false, type = '', msg = '') => {
     setAlert({ show, type, msg });
-  }
+  };
 
   const clearList = () => {
     showAlert(true, 'danger', 'empty list');
     setList([]);
-  }
+  };
 
   const removeItem = (id) => {
     showAlert(true, 'danger', 'item removed');
     setList(list.filter((item) => item.id !== id));
-  }
+  };
+
+  const editItem = (id) => {
+    const specificItem = list.find((item) => item.id === id);
+    setIsEditing(true);
+    setEditID(id);
+    setName(specificItem.title);
+  };
 
   return (
     <section className='section-center'>
@@ -62,7 +78,11 @@ function App() {
       </form>
       {list.length > 0 && (
         <div className='grocery-container'>
-          <List items={list} removeItem={removeItem} />
+          <List
+            items={list}
+            removeItem={removeItem}
+            editItem={editItem}
+          />
           <button className='clear-btn' onClick={clearList}>clear items</button>
         </div>
       )}
